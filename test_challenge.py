@@ -29,7 +29,7 @@ def get_data(path):
     return data
 
 
-test = get_data('Confocal_data_finished_antibodies_2018-02-21.xls')
+TEST = get_data('Confocal_data_finished_antibodies_2018-02-21.xls')
 
 
 def get_public(data, public=True):
@@ -41,7 +41,7 @@ def get_public(data, public=True):
     return data[data[IN_ATLAS] == public]
 
 
-get_public(test)
+get_public(TEST)
 
 
 def get_filter_mask(data, col_name, _filter):
@@ -59,7 +59,7 @@ def get_cell_data(data, cell_lines):
     return data[get_filter_mask(data, 'Cell line', cell_lines)]
 
 
-get_cell_data(test, CONTAMINATED_CELLS)
+get_cell_data(TEST, CONTAMINATED_CELLS)
 
 
 def get_well_paths(data):
@@ -78,7 +78,7 @@ def pick_random_data(data, number_rows):
     return data.sample(number_rows)
 
 
-pick_random_data(test, 2)
+pick_random_data(TEST, 2)
 
 
 if __name__ == '__main__':
