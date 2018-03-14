@@ -15,38 +15,45 @@ CONTAMINATED_CELLS = [
     'U-251 MG', 'HeLa', 'PC-3', 'HEL', 'REH', 'A549', 'MCF-7',
     'U-2 OS', 'HEK 293', 'CACO-2', 'RT4']
 
+IF_IMAGE_COLUMNS = [
+    'antibody', 'Ab state', 'versions', 'ensembl_ids', 'if_plate_id',
+    'position', 'sample', 'filename', 'status', 'locations']
 
-def get_data(path):
+
+def conv_list(_string):
+    """Split on comma."""
+    return _string.split(',')
+
+
+def get_lims_data(path):
     """Return data from xls file."""
-    def conv_location(_string):
-        """Split on comma."""
-        _string.split(',')
-
     data = pd.read_table(
         path, encoding='ISO-8859-1', header=0, usecols=COLUMNS,
-        converters={
-            'Main location': conv_location, 'Other location': conv_location})
+        dtype={
+            'Main location': str, 'Other location': str})
     return data
 
 
-TEST = get_data('Confocal_data_finished_antibodies_2018-02-21.xls')
+def get_if_images_data(path):
+    """Return data from if images csv."""
+    data = pd.read_csv(
+        path, header=0, usecols=IF_IMAGE_COLUMNS,
+        dtype={'versions': str, 'locations': str})
+    return data
 
 
 def get_public(data, public=True):
     """Return public data."""
-    if public:
-        public = 'Yes'
-    else:
-        public = 'No'
-    return data[data[IN_ATLAS] == public]
+    if 'versions' in data.columns:
+        if public:
+            return data[~data['versions'].isnull()]
+        return data[data['versions'].isnull()]
+    raise ValueError('Data is missing column versions')
 
 
-get_public(TEST)
-
-
-def get_filter_mask(data, col_name, _filter):
-    """Return boolean mask where values of col_name is in filter."""
-    return data[col_name].isin(_filter)
+def get_filter_mask(data, values):
+    """Return boolean mask where dict values matches."""
+    return data.isin(values)
 
 
 def get_cut_mask(data, cut):
@@ -54,12 +61,17 @@ def get_cut_mask(data, cut):
     return np.random.rand(len(data)) < cut
 
 
+def get_cut_data(data, cut):
+    """Return a two item tuple with data cut according to cut."""
+    mask = get_cut_mask(data, cut)
+    first = data[mask]
+    second = data[~mask]
+    return first, second
+
+
 def get_cell_data(data, cell_lines):
     """Return data where cell line types match cell_lines."""
-    return data[get_filter_mask(data, 'Cell line', cell_lines)]
-
-
-get_cell_data(TEST, CONTAMINATED_CELLS)
+    return data[get_filter_mask(data['Cell line'], cell_lines)]
 
 
 def get_well_paths(data):
@@ -78,7 +90,22 @@ def pick_random_data(data, number_rows):
     return data.sample(number_rows)
 
 
-pick_random_data(TEST, 2)
+def generate_set(lims_path, if_image_path):
+    """Generate a data set based on critera."""
+    lims_data = get_lims_data(lims_path)
+    if_image_data = get_if_images_data(if_image_path)
+    if_image_data = get_public(if_image_data)
+    # Only get data where cell line matches CONTAMINATED_CELLS.
+    lims_data = get_cell_data(lims_data, CONTAMINATED_CELLS)
+    lims_data = pick_random_data(lims_data, 2)
+    # Get if image data that is in lims data.
+    plate_filter = get_filter_mask(
+        if_image_data['if_plate_id'], lims_data['Plate id'])
+    position_filter = get_filter_mask(
+        if_image_data['position'], lims_data['Position'])
+    if_image_data = if_image_data[plate_filter]
+    if_image_data = if_image_data[position_filter]
+    return if_image_data
 
 
 if __name__ == '__main__':
