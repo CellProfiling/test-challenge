@@ -20,11 +20,6 @@ IF_IMAGE_COLUMNS = [
     'position', 'sample', 'filename', 'status', 'locations']
 
 
-def conv_list(_string):
-    """Split on comma."""
-    return _string.split(',')
-
-
 def get_lims_data(path):
     """Return data from xls file."""
     data = pd.read_table(
@@ -90,22 +85,59 @@ def pick_random_data(data, number_rows):
     return data.sample(number_rows)
 
 
-def generate_set(lims_path, if_image_path):
-    """Generate a data set based on critera."""
+def exclude_data(data, filter_):
+    """Return data where data that matches filter has been removed."""
+    return data[~filter_]
+
+
+def include_data(data, filter_):
+    """Return data where only data that matches filter has been included."""
+    return data[filter_]
+
+
+def generate_set(lims_path, if_image_path, plate_range, size, file_list=None):
+    """Generate a data set based on criteria.
+
+    Args:
+        lims_path : path to statistics csv file.
+        if_image_path : path to if image csv file.
+        plate_range : integer that filters out plates with lower numbers.
+        size : sample size.
+        file_list : List of files that should be excluded from the data set.
+
+    Returns:
+        Pandas DataFrame filtered on criteria.
+    """
     lims_data = get_lims_data(lims_path)
     if_image_data = get_if_images_data(if_image_path)
     if_image_data = get_public(if_image_data)
+    # Restrict on plate range.
+    plate_range = lims_data['Plate id'] > plate_range
+    lims_data = include_data(lims_data, plate_range)
     # Only get data where cell line matches CONTAMINATED_CELLS.
     lims_data = get_cell_data(lims_data, CONTAMINATED_CELLS)
-    lims_data = pick_random_data(lims_data, 2)
+    lims_data = pick_random_data(lims_data, size)
     # Get if image data that is in lims data.
-    plate_filter = get_filter_mask(
-        if_image_data['if_plate_id'], lims_data['Plate id'])
-    position_filter = get_filter_mask(
-        if_image_data['position'], lims_data['Position'])
-    if_image_data = if_image_data[plate_filter]
-    if_image_data = if_image_data[position_filter]
+    plate_pos_list = if_image_data['filename'].str.split('_', 2)
+    cut_filename = plate_pos_list.apply(lambda s: '_'.join(s[:2]))
+    if_image_data = add_column(if_image_data, 'cut_filename', cut_filename)
+    paths = get_well_paths(lims_data)
+    lims_data = add_column(lims_data, 'cut_filename', paths)
+    path_filter = get_filter_mask(
+        if_image_data['cut_filename'], lims_data['cut_filename'])
+    if_image_data = if_image_data[path_filter]
+    if_image_data = add_column(
+        if_image_data, 'cell_line', lims_data['Cell line'])
+    if file_list:
+        if_image_data = if_image_data[
+            ~if_image_data['filename'].isin(file_list)]
     return if_image_data
+
+
+# TODO: Add new name column to data set.
+# TODO: Add cell line column to data set. Join data sets on column.
+# TODO: Make sure to cut into sample cuts
+# after sample filtering on filename and sample size.
 
 
 if __name__ == '__main__':
