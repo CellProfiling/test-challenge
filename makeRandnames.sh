@@ -16,22 +16,22 @@ outbase=$(basename "$OUTFOLDER")
 #Get original file names
 #Note, if you don't have the right pattern, this code will do nothing!
 #Change pattern below if need be
-filepattern=$INFOLDER*_red.tif
+filepattern="$INFOLDER*_red.tif"
 
 filelist=$(ls $filepattern)
 
 for file in $filelist:
 do
-   echo "$file"
+   echo "Matched file: $file"
    filename=$(basename "$file")
    #echo $filename
    #strip file name to base
    origname=$(echo "$filename" | awk -F'_' '{print $1"_"$2"_"$3"_"}')
 
-   echo "$origname"
+   echo "Stripped base name: $origname"
    #create new name
    newname=$(./genRand.sh)_$currdate
-   echo "$newname"
+   echo "New name base: $newname"
 
 
    #write out translation file
@@ -42,15 +42,16 @@ do
    #use cp for testing
    currpattern=$INFOLDER$origname
    currfilelist=$(ls "$currpattern"*)
+   echo "Matched files second:"
    echo "$currfilelist"
    for currfile in $currfilelist ;
    do
-      echo "$currfile"
+      echo "File to change name: $currfile"
       currnameonly=$(basename "$currfile")
 
       currnewnameonly=${currnameonly#$origname}
       currnewname=$OUTFOLDER$newname"_"$currnewnameonly
-      echo "$currnewname"
+      echo "New name: $currnewname"
       cp "$currfile" "$currnewname"
    done
 
