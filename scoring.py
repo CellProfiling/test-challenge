@@ -188,7 +188,7 @@ if __name__ == '__main__':
     binarizer = Binarizer(POSSIBLE_CLASSES)
 
     solution_ids, solution_classes = parse_solution_file(args.solution)
-    solution = binarizer(solution_classes)
+    bin_solution = binarizer(solution_classes)
 
     prediction_ids, prediction_classes = parse_solution_file(args.predictions)
     # Make sure that we are working on the same dataset
@@ -199,10 +199,10 @@ if __name__ == '__main__':
             prediction_ids) - set(solution_ids))
         sys.exit(-1)
 
-    prediction = binarizer(prediction_classes)
-    overall_result = precision_recall(prediction, solution, True)
+    bin_prediction = binarizer(prediction_classes)
+    overall_result = precision_recall(bin_prediction, bin_solution, True)
 
-    result = precision_recall(prediction, solution, True, 'class')
+    result = precision_recall(bin_prediction, bin_solution, True, 'class')
 
     output_file = args.output_file
     if output_file:
