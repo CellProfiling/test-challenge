@@ -116,7 +116,7 @@ def filter_csv(csvfile, include={}, exclude={}, minimum={}, maximum={},
 
     Example usage:
         a_csv = ['a,b', '1,0', '"2,0",0', '5,5', '1,1']
-        ret = filter(a_csv, include={'a': {'1', '0'}}, exclude={'b': {'1'}})
+        ret = filter_csv(a_csv, include={'a': {'1', '0'}}, exclude={'b': {'1'}})
         # ret is equal to ['a,b, '1,0', '"2,0",0']
     """
     def filter_line(line, constraints):
@@ -191,10 +191,10 @@ def validate_argument(context, param, argument):
         for arg in argument:
             split = arg.split(':')
             if len(split) != 2:
-                raise click.BadParameter('Argument must follow the format <a:b>')
+                raise click.BadParameter('Argument must follow the format "a:b"')
         return argument
     except AttributeError:
-            raise click.BadParameter('Argument must follow the format <a:b>')
+            raise click.BadParameter('Argument must follow the format "a:b"')
 
 
 @click.command()
