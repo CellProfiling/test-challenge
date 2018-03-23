@@ -8,6 +8,10 @@ import operator
 
 @contextlib.contextmanager
 def smart_open(filename=None):
+    """
+    A file handling context manager which will open a file for writing if a
+    filename is supplied, otherwise stdout will be opened instead.
+    """
     if filename and filename != '-':
         file_handle = open(filename, 'w')
     else:
@@ -23,6 +27,9 @@ def smart_open(filename=None):
 def cut_csv(csvfile, columns, fieldnames=None, delimiter=',', quotechar='"'):
     """
     Creates a new csvlist containing only the specified columns.
+    Arguments:
+        columns: Which columns to include.
+    All other arguments are the same as `filter_csv`.
     """
     csvreader = csv.DictReader(csvfile, fieldnames=fieldnames, delimiter=delimiter, quotechar=quotechar)
 
@@ -176,6 +183,10 @@ def filter_csv(csvfile, include={}, exclude={}, minimum={}, maximum={},
 
 
 def validate_argument(context, param, argument):
+    """
+    Click appropriate callback that will validate that every argument follows
+    the correct format.
+    """
     try:
         for arg in argument:
             split = arg.split(':')
