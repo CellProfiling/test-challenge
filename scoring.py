@@ -163,7 +163,10 @@ def parse_solution_file(solution_file):
 
 # POSSIBLE_CLASSES should in the future be modified to be program param.
 POSSIBLE_CLASSES = ['U2OS', 'A431', 'HELA']
-if __name__ == '__main__':
+
+
+def main():
+    """Run script."""
     parser = argparse.ArgumentParser(
         description=('Scores precision, recall, and f1 score for a '
                      'simple classification challenge.\r\n'
@@ -220,3 +223,7 @@ if __name__ == '__main__':
             print(class_, result[0][i], result[1][i], result[2][i])
         print('Overall', overall_result[0],
               overall_result[1], overall_result[2])
+
+
+if __name__ == '__main__':
+    main()
