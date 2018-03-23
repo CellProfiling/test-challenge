@@ -1,9 +1,10 @@
 #!/usr/bin/python3
-import collections
-import numpy as np
 import argparse
+import collections
 import csv
 import sys
+
+import numpy as np
 
 
 def precision_recall(prediction, actual, include_f1=False, mode='total'):
@@ -39,14 +40,14 @@ def precision_recall(prediction, actual, include_f1=False, mode='total'):
     falseneg = np.sum(falseneg, axis=axis)
 
     with np.errstate(divide='ignore', invalid='ignore'):
-        precision = truepos/(truepos + falsepos)
-        recall = truepos/(truepos + falseneg)
+        precision = truepos / (truepos + falsepos)
+        recall = truepos / (truepos + falseneg)
         if not np.isscalar(precision):
             precision[~np.isfinite(precision)] = 0
             recall[~np.isfinite(recall)] = 0
 
         if include_f1:
-            f1 = 2*(precision*recall)/(precision+recall)
+            f1 = 2 * (precision * recall) / (precision + recall)
 
     if include_f1:
         return precision, recall, f1
@@ -85,7 +86,7 @@ def jaccard_index(y_true, y_predict):
         union = true.union(pred)
         numerator += len(intersection)
         denominator += len(union)
-    return numerator/denominator
+    return numerator / denominator
 
 
 class Binarizer(object):
@@ -164,17 +165,17 @@ def parse_solution_file(solution_file):
 POSSIBLE_CLASSES = ['U2OS', 'A431', 'HELA']
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-            description=('Scores precision, recall, and f1 score for a '
-                         'simple classification challenge.\r\n'
-                         'Both solution files and prediction files should '
-                         'follow the general format of:\n\n'
-                         'ID1,ANSWER1\n'
-                         'ID2,ANSWER2\n'
-                         '...\n\n'
-                         'Note that it is required that all IDs are present '
-                         'in both files in the same order.'
-                         ),
-            formatter_class=argparse.RawTextHelpFormatter)
+        description=('Scores precision, recall, and f1 score for a '
+                     'simple classification challenge.\r\n'
+                     'Both solution files and prediction files should '
+                     'follow the general format of:\n\n'
+                     'ID1,ANSWER1\n'
+                     'ID2,ANSWER2\n'
+                     '...\n\n'
+                     'Note that it is required that all IDs are present '
+                     'in both files in the same order.'
+                     ),
+        formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('solution', help='The gold standard solutions')
     parser.add_argument('predictions', help='Predictions from the challenger')
     parser.add_argument('-O', '--output-file', type=str, default=None,
@@ -193,8 +194,9 @@ if __name__ == '__main__':
     # Make sure that we are working on the same dataset
     if not solution_ids == prediction_ids:
         print('The IDs in the two files are unordered or non-equal.')
-        print('IDs only in solution:', set(solution_ids)-set(prediction_ids))
-        print('IDs only in prediction:', set(prediction_ids)-set(solution_ids))
+        print('IDs only in solution:', set(solution_ids) - set(prediction_ids))
+        print('IDs only in prediction:', set(
+            prediction_ids) - set(solution_ids))
         sys.exit(-1)
 
     prediction = binarizer(prediction_classes)
@@ -209,10 +211,12 @@ if __name__ == '__main__':
         writer.writerow(['class', 'pre', 'rec', 'f1'])
         for i, class_ in enumerate(binarizer.classes):
             writer.writerow([class_, result[0][i], result[1][i], result[2][i]])
-        writer.writerow(['overall', overall_result[0], overall_result[1], overall_result[2]])
+        writer.writerow(['overall', overall_result[0],
+                         overall_result[1], overall_result[2]])
         csvfile.close()
     else:
         print('class', 'pre', 'rec', 'f1')
         for i, class_ in enumerate(binarizer.classes):
             print(class_, result[0][i], result[1][i], result[2][i])
-        print('Overall', overall_result[0], overall_result[1], overall_result[2])
+        print('Overall', overall_result[0],
+              overall_result[1], overall_result[2])
