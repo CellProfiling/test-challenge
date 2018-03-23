@@ -213,6 +213,9 @@ def create_dataset(csv_file, include, exclude, columns, output, min, max,
     If a row has any item in the specified column matching the argument, they
     will be included or excluded as specified.
 
+    Most arguments can be applied multiple times.
+    For example: multiple exclusions can be made by several `-e` arguments.
+
     By default outputs every available column to stdout.
 
     Note: Exclusion acts stronger than inclusion.
