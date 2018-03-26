@@ -164,14 +164,13 @@ class Binarizer(object):
 
 def parse_solution_file(solution_file):
     """Parse a solution file."""
-    file_handle = open(solution_file)
-    solution_reader = csv.reader(file_handle)
     ids = []
     classes = []
-
-    for row in solution_reader:
-        ids.append(row[0])
-        classes.append(row[1])
+    with open(solution_file) as file_handle:
+        solution_reader = csv.reader(file_handle)
+        for row in solution_reader:
+            ids.append(row[0])
+            classes.append(row[1])
     return ids, classes
 
 
