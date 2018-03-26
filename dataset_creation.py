@@ -1,9 +1,10 @@
 #!/usr/bin/python3
-import click
-import csv
-import sys
 import contextlib
+import csv
 import operator
+import sys
+
+import click
 
 
 @contextlib.contextmanager
@@ -31,11 +32,13 @@ def cut_csv(csvfile, columns, fieldnames=None, delimiter=',', quotechar='"'):
         columns: Which columns to include.
     All other arguments are the same as `filter_csv`.
     """
-    csvreader = csv.DictReader(csvfile, fieldnames=fieldnames, delimiter=delimiter, quotechar=quotechar)
+    csvreader = csv.DictReader(
+        csvfile, fieldnames=fieldnames, delimiter=delimiter, quotechar=quotechar)
 
     include_headers = not fieldnames
     fieldnames = csvreader.fieldnames
-    fieldnames = [fieldname for fieldname in fieldnames if fieldname in columns]
+    fieldnames = [
+        fieldname for fieldname in fieldnames if fieldname in columns]
 
     filtered_csv = []
     if include_headers:
@@ -123,7 +126,8 @@ def filter_csv(csvfile, include={}, exclude={}, minimum={}, maximum={},
         filters = []
         for constraint in constraints:
             constraint_line = line[constraint].split(delimiter)
-            constraint_line = [str(value) in constraints[constraint] for value in constraint_line]
+            constraint_line = [str(value) in constraints[constraint]
+                               for value in constraint_line]
             filters.append(any(constraint_line))
         return filters
 
@@ -133,10 +137,12 @@ def filter_csv(csvfile, include={}, exclude={}, minimum={}, maximum={},
             constraint_line = line[constraint].split(delimiter)
             try:
                 value = float(value)
-                constraint_line = [op(float(val), value) for val in constraint_line]
+                constraint_line = [op(float(val), value)
+                                   for val in constraint_line]
             except ValueError:
                 value = str(value)
-                constraint_line = [op(str(val), value) for val in constraint_line]
+                constraint_line = [op(str(val), value)
+                                   for val in constraint_line]
 
             if strict_min_max_search:
                 filters.append(all(constraint_line))
@@ -144,7 +150,8 @@ def filter_csv(csvfile, include={}, exclude={}, minimum={}, maximum={},
                 filters.append(any(constraint_line))
         return filters
 
-    csvreader = csv.DictReader(csvfile, fieldnames=fieldnames, delimiter=delimiter, quotechar=quotechar)
+    csvreader = csv.DictReader(
+        csvfile, fieldnames=fieldnames, delimiter=delimiter, quotechar=quotechar)
     filtered_csv = []
 
     # DictReader removes headers from the read file if we did not supply our own
@@ -191,10 +198,11 @@ def validate_argument(context, param, argument):
         for arg in argument:
             split = arg.split(':')
             if len(split) != 2:
-                raise click.BadParameter('Argument must follow the format "a:b"')
+                raise click.BadParameter(
+                    'Argument must follow the format "a:b"')
         return argument
     except AttributeError:
-            raise click.BadParameter('Argument must follow the format "a:b"')
+        raise click.BadParameter('Argument must follow the format "a:b"')
 
 
 @click.command()
