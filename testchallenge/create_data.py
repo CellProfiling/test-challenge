@@ -1,39 +1,19 @@
 """Module for data parsing."""
 import os
 
-import pandas as pd
+import click
 import numpy as np
+import pandas as pd
 
-
-IN_ATLAS = 'In atlas 18.0'
 PLATE_ID_CUT = 300
-COLUMNS = [
-    'Antibody', 'IH state', 'Antibody state', IN_ATLAS,
-    'Ensembl id', 'Cell line', 'Plate id', 'Position',
-    'Main location', 'Other location']
 CONTAMINATED_CELLS = [
     'U-251 MG', 'HeLa', 'PC-3', 'HEL', 'REH', 'A549', 'MCF-7',
     'U-2 OS', 'HEK 293', 'CACO-2', 'RT4']
 
-IF_IMAGE_COLUMNS = [
-    'antibody', 'Ab state', 'versions', 'ensembl_ids', 'if_plate_id',
-    'position', 'sample', 'filename', 'status', 'locations']
 
-
-def get_lims_data(path):
-    """Return data from xls file."""
-    data = pd.read_table(
-        path, encoding='ISO-8859-1', header=0, usecols=COLUMNS,
-        dtype={
-            'Main location': str, 'Other location': str})
-    return data
-
-
-def get_if_images_data(path):
+def load_data(path):
     """Return data from if images csv."""
-    data = pd.read_csv(
-        path, header=0, usecols=IF_IMAGE_COLUMNS,
-        dtype={'versions': str, 'locations': str})
+    data = pd.read_csv(path, header=0, dtype=str)
     return data
 
 
@@ -64,81 +44,148 @@ def get_cut_data(data, cut):
     return first, second
 
 
-def get_cell_data(data, cell_lines):
-    """Return data where cell line types match cell_lines."""
-    return data[get_filter_mask(data['Cell line'], cell_lines)]
-
-
-def get_well_paths(data):
-    """Return a Pandas series with paths to images in data."""
-    return (data['Plate id'].map(lambda x: os.path.join('/archive', str(x))) +
-            '/' + data['Plate id'].map(str) + '_' + data['Position'])
-
-
 def add_column(data, col_name, column):
     """Return data where a column has been added."""
     return data.assign(**{col_name: column})
 
 
-def pick_random_data(data, number_rows):
-    """Return randomly selected specified number of rows of data."""
-    return data.sample(number_rows)
+def include_columns(data, columns):
+    """Return data with only the specified columns."""
+    if not isinstance(columns, list):
+        columns = [columns]
+    return data[columns]
 
 
-def exclude_data(data, filter_):
-    """Return data where data that matches filter has been removed."""
-    return data[~filter_]
+def try_float(value):
+    """Try to convert value to float."""
+    try:
+        value = float(value)
+    except ValueError:
+        raise
+    return value
 
 
-def include_data(data, filter_):
-    """Return data where only data that matches filter has been included."""
-    return data[filter_]
-
-
-def generate_set(lims_path, if_image_path, plate_range, size, file_list=None):
+def generate_set(data, exclude, include, maximum, minimum, size=None):
     """Generate a data set based on criteria.
 
     Args:
-        lims_path : path to statistics csv file.
-        if_image_path : path to if image csv file.
-        plate_range : integer that filters out plates with lower numbers.
-        size : sample size.
-        file_list : List of files that should be excluded from the data set.
+        data : DataFrame to filter.
+        exclude : Dict of columns and lists of values to exclude.
+        include : Dict of columns and lists of values to include.
+        maximum : Dict of columns and values that should be max limit.
+        minimum : Dict of columns and values that should be min limit.
+        size : Sample size.
 
     Returns:
         Pandas DataFrame filtered on criteria.
     """
-    lims_data = get_lims_data(lims_path)
-    if_image_data = get_if_images_data(if_image_path)
-    if_image_data = get_public(if_image_data)
-    # Restrict on plate range.
-    plate_range = lims_data['Plate id'] > plate_range
-    lims_data = include_data(lims_data, plate_range)
-    # Only get data where cell line matches CONTAMINATED_CELLS.
-    lims_data = get_cell_data(lims_data, CONTAMINATED_CELLS)
-    lims_data = pick_random_data(lims_data, size)
-    # Get if image data that is in lims data.
-    plate_pos_list = if_image_data['filename'].str.split('_', 2)
-    cut_filename = plate_pos_list.apply(lambda s: '_'.join(s[:2]))
-    if_image_data = add_column(if_image_data, 'cut_filename', cut_filename)
-    paths = get_well_paths(lims_data)
-    lims_data = add_column(lims_data, 'cut_filename', paths)
-    path_filter = get_filter_mask(
-        if_image_data['cut_filename'], lims_data['cut_filename'])
-    if_image_data = if_image_data[path_filter]
-    if_image_data = add_column(
-        if_image_data, 'cell_line', lims_data['Cell line'])
-    if file_list:
-        if_image_data = if_image_data[
-            ~if_image_data['filename'].isin(file_list)]
-    return if_image_data
+    # Exclude items.
+    for col, vals in exclude.items():
+        data = data[~data[col].isin(vals)]
+    # Include items.
+    for col, vals in include.items():
+        data = data[data[col].isin(vals)]
+    # Filter minimum.
+    for col, val in minimum.items():
+        filt = data[col].astype('float') >= val
+        data = data[filt]
+    # Filter maximum.
+    for col, val in maximum.items():
+        filt = data[col].astype('float') <= val
+        data = data[filt]
+    # Filter randomly on sample size.
+    if size and not data.empty:
+        data = data.sample(size)
+    return data
 
 
-# TODO: Add new name column to data set.
-# TODO: Add cell line column to data set. Join data sets on column.
+def generate_all(
+        path, cut, exclude=None, include=None, maximum=None, minimum=None,
+        size=None, output=None, public=None):
+    """Generate all data sets.
+
+    Args:
+        path : Path to csv file.
+        exclude : Dict of columns and lists of values to exclude.
+        include : Dict of columns and lists of values to include.
+        maximum : Dict of columns and values that should be max limit.
+        minimum : Dict of columns and values that should be min limit.
+        size : Sample size.
+        public : Boolean where true means only public data should be included.
+    """
+    if include is None:
+        include = {}
+    if exclude is None:
+        exclude = {}
+    if minimum is None:
+        minimum = {}
+    if maximum is None:
+        maximum = {}
+    data = load_data(path)
+    if public is not None:
+        # Filter public/non public.
+        data = get_public(data, public=public)
+    all_sets = {}
+    training = []
+    validation = []
+
+    for cell_line in CONTAMINATED_CELLS:
+        print(cell_line)
+        include['atlas_name'] = [cell_line]
+        single_set = generate_set(
+            data, exclude, include, maximum, minimum, size)
+        single_set = single_set.rename(columns={'atlas_name': 'cell_line'})
+        # Split each set 80/20 into training/validation
+        cut_data, rest_data = get_cut_data(single_set, cut)
+        training.append(cut_data)
+        validation.append(rest_data)
+
+    # Combine all training sets and all validation sets into two sets.
+    training_set = pd.concat(training)
+    validation_set = pd.concat(validation)
+
+    # Sets should have these columns: filename, cell_line.
+    for name, part in (
+            ('training', training_set), ('validation', validation_set)):
+        all_sets[name] = include_columns(part, ['filename', 'cell_line'])
+
+    if output is not None:
+        # Save both sets as two csv files.
+        for name, data in all_sets.items():
+            data.to_csv('{}.csv'.format(
+                os.path.join(os.path.normpath(output), name)))
+
+    return all_sets
+
+
+@click.group()
+def cli():
+    """Start CLI."""
+    pass
+
+
+@cli.command()
+@click.argument('csv_file')
+@click.option('-o', '--output', help='Output to a directory')
+def main(csv_file, output):
+    """Run script."""
+    exclude = None  # add filelist here if needed
+    include = None
+    maximum = None
+    minimum = {'if_plate_id': PLATE_ID_CUT}
+
+    # For each cell line, make a set of sample size 200.
+    all_sets = generate_all(
+        csv_file, 0.8, exclude, include, maximum, minimum, 200, output=output,
+        public=None)
+
+    return all_sets
+
+
 # TODO: Make sure to cut into sample cuts
 # after sample filtering on filename and sample size.
-
+# TODO: Validate that all paths from one well are in one of the dataset cuts:
+# training, validation or test
 
 if __name__ == '__main__':
-    pass
+    cli()
