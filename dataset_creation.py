@@ -43,11 +43,11 @@ def cut_csv(csvfile, columns, fieldnames=None, delimiter=',', quotechar='"'):
     filtered_csv = []
     if include_headers:
         linestring = ''
-        for fn in fieldnames:
-            if delimiter in fn:
-                linestring += '{0}{1}{0}'.format(quotechar, fn) + delimiter
+        for name in fieldnames:
+            if delimiter in name:
+                linestring += '{0}{1}{0}'.format(quotechar, name) + delimiter
             else:
-                linestring += fn + delimiter
+                linestring += name + delimiter
         filtered_csv.append(linestring[:-len(delimiter)])
 
     for line in csvreader:
@@ -131,17 +131,17 @@ def filter_csv(csvfile, include={}, exclude={}, minimum={}, maximum={},
             filters.append(any(constraint_line))
         return filters
 
-    def range_limit(line, value_dict, op):
+    def range_limit(line, value_dict, oper):
         filters = []
         for constraint, value in value_dict.items():
             constraint_line = line[constraint].split(delimiter)
             try:
                 value = float(value)
-                constraint_line = [op(float(val), value)
+                constraint_line = [oper(float(val), value)
                                    for val in constraint_line]
             except ValueError:
                 value = str(value)
-                constraint_line = [op(str(val), value)
+                constraint_line = [oper(str(val), value)
                                    for val in constraint_line]
 
             if strict_min_max_search:
@@ -161,11 +161,11 @@ def filter_csv(csvfile, include={}, exclude={}, minimum={}, maximum={},
 
     if include_headers:
         linestring = ''
-        for fn in fieldnames:
-            if delimiter in fn:
-                linestring += '{0}{1}{0}'.format(quotechar, fn) + delimiter
+        for name in fieldnames:
+            if delimiter in name:
+                linestring += '{0}{1}{0}'.format(quotechar, name) + delimiter
             else:
-                linestring += fn + delimiter
+                linestring += name + delimiter
         filtered_csv.append(linestring[:-len(delimiter)])
 
     for line in csvreader:
