@@ -169,8 +169,11 @@ def parse_solution_file(solution_file):
     with open(solution_file) as file_handle:
         solution_reader = csv.reader(file_handle)
         for row in solution_reader:
+            class_ = row[1]
+            if class_ not in POSSIBLE_CLASSES:
+                raise ValueError('Unallowed class found: {}'.format(class_))
             ids.append(row[0])
-            classes.append(row[1])
+            classes.append(class_)
     return ids, classes
 
 
