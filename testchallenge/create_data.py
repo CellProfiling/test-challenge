@@ -26,11 +26,6 @@ def get_public(data, public=True):
     raise ValueError('Data is missing column versions')
 
 
-def get_filter_mask(data, values):
-    """Return boolean mask where dict values matches."""
-    return data.isin(values)
-
-
 def get_cut_mask(data, cut):
     """Return a boolean mask of data size to cut the data in two pieces."""
     return np.random.rand(len(data)) < cut
@@ -54,15 +49,6 @@ def include_columns(data, columns):
     if not isinstance(columns, list):
         columns = [columns]
     return data[columns]
-
-
-def try_float(value):
-    """Try to convert value to float."""
-    try:
-        value = float(value)
-    except ValueError:
-        raise
-    return value
 
 
 def generate_set(data, exclude, include, maximum, minimum, size=None):
