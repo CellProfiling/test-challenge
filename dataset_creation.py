@@ -33,7 +33,8 @@ def cut_csv(csvfile, columns, fieldnames=None, delimiter=',', quotechar='"'):
     All other arguments are the same as `filter_csv`.
     """
     csvreader = csv.DictReader(
-        csvfile, fieldnames=fieldnames, delimiter=delimiter, quotechar=quotechar)
+        csvfile, fieldnames=fieldnames, delimiter=delimiter,
+        quotechar=quotechar)
 
     include_headers = not fieldnames
     fieldnames = csvreader.fieldnames
@@ -119,7 +120,8 @@ def filter_csv(csvfile, include={}, exclude={}, minimum={}, maximum={},
 
     Example usage:
         a_csv = ['a,b', '1,0', '"2,0",0', '5,5', '1,1']
-        ret = filter_csv(a_csv, include={'a': {'1', '0'}}, exclude={'b': {'1'}})
+        ret = filter_csv(
+            a_csv, include={'a': {'1', '0'}}, exclude={'b': {'1'}})
         # ret is equal to ['a,b, '1,0', '"2,0",0']
     """
     def filter_line(line, constraints):
@@ -151,11 +153,12 @@ def filter_csv(csvfile, include={}, exclude={}, minimum={}, maximum={},
         return filters
 
     csvreader = csv.DictReader(
-        csvfile, fieldnames=fieldnames, delimiter=delimiter, quotechar=quotechar)
+        csvfile, fieldnames=fieldnames, delimiter=delimiter,
+        quotechar=quotechar)
     filtered_csv = []
 
-    # DictReader removes headers from the read file if we did not supply our own
-    # If so, re-add the headers.
+    # DictReader removes headers from the read file
+    # if we did not supply our own. If so, re-add the headers.
     include_headers = not fieldnames
     fieldnames = csvreader.fieldnames
 
