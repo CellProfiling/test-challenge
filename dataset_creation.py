@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+"""Creat dataset."""
 import contextlib
 import csv
 import operator
@@ -9,7 +10,8 @@ import click
 
 @contextlib.contextmanager
 def smart_open(filename=None):
-    """
+    """Open a file or stdout.
+
     A file handling context manager which will open a file for writing if a
     filename is supplied, otherwise stdout will be opened instead.
     """
@@ -26,10 +28,11 @@ def smart_open(filename=None):
 
 
 def cut_csv(csvfile, columns, fieldnames=None, delimiter=',', quotechar='"'):
-    """
-    Creates a new csvlist containing only the specified columns.
+    """Create a new csvlist containing only the specified columns.
+
     Arguments:
         columns: Which columns to include.
+
     All other arguments are the same as `filter_csv`.
     """
     csvreader = csv.DictReader(
@@ -67,13 +70,11 @@ def cut_csv(csvfile, columns, fieldnames=None, delimiter=',', quotechar='"'):
 def filter_csv(csvfile, include={}, exclude={}, minimum={}, maximum={},
                fieldnames=None, delimiter=',', quotechar='"',
                strict_min_max_search=False):
-    """
-    Filters a csv file to include only items containing the correct values in
-    the columns.
+    """Filter csv file to include only items with correct values in columns.
 
     The minimum and maximum will compare items based on their values.
-    It will first try an float comparison, otherwise a string comparison will
-    be used.
+    It will first try a float comparison. If that fails a string comparison
+    will be used.
 
     Args:
         csv: The csv file to be filtered.
@@ -125,6 +126,7 @@ def filter_csv(csvfile, include={}, exclude={}, minimum={}, maximum={},
         # ret is equal to ['a,b, '1,0', '"2,0",0']
     """
     def filter_line(line, constraints):
+        """Filter line."""
         filters = []
         for constraint in constraints:
             constraint_line = line[constraint].split(delimiter)
@@ -134,6 +136,7 @@ def filter_csv(csvfile, include={}, exclude={}, minimum={}, maximum={},
         return filters
 
     def range_limit(line, value_dict, oper):
+        """Limit range."""
         filters = []
         for constraint, value in value_dict.items():
             constraint_line = line[constraint].split(delimiter)
@@ -193,9 +196,9 @@ def filter_csv(csvfile, include={}, exclude={}, minimum={}, maximum={},
 
 
 def validate_argument(context, param, argument):
-    """
-    Click appropriate callback that will validate that every argument follows
-    the correct format.
+    """Validate that every argument follows the correct format.
+
+    This is a Click compatible callback.
     """
     try:
         for arg in argument:
@@ -225,9 +228,9 @@ def validate_argument(context, param, argument):
               help='Use strict min max searching')
 def create_dataset(csv_file, include, exclude, columns, output, min, max,
                    strict):
-    """
-    Creates a dataset from a csv file, including and excluding items from the
-    file as required by the user.
+    """Create a dataset from a csv file.
+
+    The user can include and exclude items from the file.
 
     Unless otherwise specified, most arguments should follow
     the format <column name>:<argument>.
@@ -238,7 +241,7 @@ def create_dataset(csv_file, include, exclude, columns, output, min, max,
     Most arguments can be applied multiple times.
     For example: multiple exclusions can be made by several `-e` arguments.
 
-    By default outputs every available column to stdout.
+    By default output every available column to stdout.
 
     Note: Exclusion acts stronger than inclusion.
     """
