@@ -139,7 +139,7 @@ def generate_all(
         # Save both sets as two csv files.
         for name, data in all_sets.items():
             data.to_csv('{}.csv'.format(
-                os.path.join(os.path.normpath(output), name)))
+                os.path.join(os.path.normpath(output), name)), index=False)
 
     return all_sets
 
@@ -168,10 +168,10 @@ def main(csv_file, output):
     return all_sets
 
 
-# TODO: Make sure to cut into sample cuts
-# after sample filtering on filename and sample size.
 # TODO: Validate that all paths from one well are in one of the dataset cuts:
 # training, validation or test
+# TODO: Make sure to cut into sample cuts
+# after sample filtering on filename and sample size.
 
 if __name__ == '__main__':
     cli()
