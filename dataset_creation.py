@@ -220,14 +220,14 @@ def validate_argument(context, param, argument):
 @click.option('-c', '--columns', help='Only output the specified columns.'
                                       'Needs to be a comma separated list')
 @click.option('-o', '--output', default='-', help='Output to a file')
-@click.option('--min', multiple=True, callback=validate_argument,
+@click.option('--minimum', multiple=True, callback=validate_argument,
               help='Specify a minimum value for a column')
-@click.option('--max', multiple=True, callback=validate_argument,
+@click.option('--maximum', multiple=True, callback=validate_argument,
               help='Specify a maximum value for a column')
 @click.option('--strict/--no-strict', default=False,
               help='Use strict min max searching')
-def create_dataset(csv_file, include, exclude, columns, output, min, max,
-                   strict):
+def create_dataset(
+        csv_file, include, exclude, columns, output, minimum, maximum, strict):
     """Create a dataset from a csv file.
 
     The user can include and exclude items from the file.
@@ -258,11 +258,11 @@ def create_dataset(csv_file, include, exclude, columns, output, min, max,
         argument = argument.split(':')
         exclude_arguments[argument[0]] = argument[1]
 
-    for argument in min:
+    for argument in minimum:
         argument = argument.split(':')
         minimum_arguments[argument[0]] = argument[1]
 
-    for argument in max:
+    for argument in maximum:
         argument = argument.split(':')
         maximum_arguments[argument[0]] = argument[1]
 
