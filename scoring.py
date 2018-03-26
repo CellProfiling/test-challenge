@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+"""Handle scoring of predictions."""
 import argparse
 import collections
 import csv
@@ -13,12 +14,15 @@ def precision_recall(prediction, actual, include_f1=False, mode='total'):
     Optionally calculates the f1 score as well.
 
     Args:
-        prediction: A binary matrix representing the predictions on the dataset.
-        actual: A binary matrix representing the actual true positives of the dataset.
+        prediction: A binary matrix representing the predictions on the
+            dataset.
+        actual: A binary matrix representing the actual true positives
+            of the dataset.
         include_f1: Whether or not to include f1 in the return values.
         mode: One of 'total' or 'class'.
               In 'total' mode, the entire set is considered.
-              In 'class' mode, the precision and recall is calculated for each class individually.
+              In 'class' mode, the precision and recall is calculated
+              for each class individually.
     Returns:
         A tuple containing (precision, recall).
         If include_f1 is True, the tuple contains (precision, recall, f1).
@@ -71,7 +75,8 @@ def jaccard_index(y_true, y_predict):
         y_predict:   A list of binary vectors.
                      The list should consist of the prediction vectors.
     Returns:
-        The Jaccard index (jaccard similarity) of the predictions on the true labels.
+        The Jaccard index (jaccard similarity) of the predictions
+        on the true labels.
     """
     numerator = 0
     denominator = 0
@@ -90,6 +95,8 @@ def jaccard_index(y_true, y_predict):
 
 
 class Binarizer(object):
+    """A binarizer where 1 means class is present, 0 means it is not."""
+
     def __init__(self, classes):
         """
         Args:
@@ -100,12 +107,14 @@ class Binarizer(object):
         self._reverse_index = dict(zip(range(len(self.classes)), self.classes))
 
     def bin_label(self, item):
-        """
-        Binarize a single item.
-        If the item is iterable and is not a string, the item will be binarized as a multi-label item.
+        """Binarize a single item.
+
+        If the item is iterable and is not a string, the item will be
+        binarized as a multi-label item.
         """
         bin_ = [0] * len(self.classes)
-        if isinstance(item, collections.Iterable) and not isinstance(item, str):
+        if (isinstance(item, collections.Iterable) and
+                not isinstance(item, str)):
             for class_ in item:
                 bin_[self._index[class_]] = 1
         else:
@@ -113,11 +122,13 @@ class Binarizer(object):
         return bin_
 
     def binarize(self, to_bin):
-        """
+        """Binarize a list of labels.
+
         Args:
             to_bin: A list of of labels to be binarized.
-               Items in `to_bin` that are iterable (except strings) will be binarized as a multi-label item,
-               all other items will be binarized as a single-label item.
+               Items in `to_bin` that are iterable (except strings)
+               will be binarized as a multi-label item. All other items
+               will be binarized as a single-label item.
         Returns:
             A list of binarized label lists.
         """
@@ -128,6 +139,7 @@ class Binarizer(object):
         return binarized
 
     def unbin_label(self, item):
+        """Unbinarize a single item."""
         unbin = []
         for idx in item:
             if idx:
@@ -135,6 +147,7 @@ class Binarizer(object):
         return unbin
 
     def unbinarize(self, from_bin):
+        """Unbinarize a list of binarized labels."""
         unbinarized = []
         for item in from_bin:
             unbinarized.append(self.unbin_label(item))
@@ -150,6 +163,7 @@ class Binarizer(object):
 
 
 def parse_solution_file(solution_file):
+    """Parse a solution file."""
     file_handle = open(solution_file)
     solution_reader = csv.reader(file_handle)
     ids = []
