@@ -67,7 +67,7 @@ def cut_csv(csvfile, columns, fieldnames=None, delimiter=',', quotechar='"'):
     return filtered_csv
 
 
-def filter_csv(csvfile, include={}, exclude={}, minimum={}, maximum={},
+def filter_csv(csvfile, include=None, exclude=None, minimum=None, maximum=None,
                fieldnames=None, delimiter=',', quotechar='"',
                strict_min_max_search=False):
     """Filter csv file to include only items with correct values in columns.
@@ -154,6 +154,15 @@ def filter_csv(csvfile, include={}, exclude={}, minimum={}, maximum={},
             else:
                 filters.append(any(constraint_line))
         return filters
+
+    if include is None:
+        include = {}
+    if exclude is None:
+        exclude = {}
+    if minimum is None:
+        minimum = {}
+    if maximum is None:
+        maximum = {}
 
     csvreader = csv.DictReader(
         csvfile, fieldnames=fieldnames, delimiter=delimiter,
