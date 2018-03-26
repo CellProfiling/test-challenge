@@ -47,10 +47,10 @@ def precision_recall(prediction, actual, include_f1=False, mode='total'):
             recall[~np.isfinite(recall)] = 0
 
         if include_f1:
-            f1 = 2 * (precision * recall) / (precision + recall)
+            f1_score = 2 * (precision * recall) / (precision + recall)
 
     if include_f1:
-        return precision, recall, f1
+        return precision, recall, f1_score
     return precision, recall
 
 
@@ -75,12 +75,12 @@ def jaccard_index(y_true, y_predict):
     """
     numerator = 0
     denominator = 0
-    for (r, p) in zip(y_true, y_predict):
-        if len(r) != len(p):
+    for (true_item, pred_item) in zip(y_true, y_predict):
+        if len(true_item) != len(pred_item):
             raise ValueError('Array lengths do not agree')
 
-        true = set(np.where(r)[0])
-        pred = set(np.where(p)[0])
+        true = set(np.where(true_item)[0])
+        pred = set(np.where(pred_item)[0])
 
         intersection = true.intersection(pred)
         union = true.union(pred)
@@ -106,37 +106,37 @@ class Binarizer(object):
         """
         bin_ = [0] * len(self.classes)
         if isinstance(item, collections.Iterable) and not isinstance(item, str):
-            for c in item:
-                bin_[self._index[c]] = 1
+            for class_ in item:
+                bin_[self._index[class_]] = 1
         else:
             bin_[self._index[item]] = 1
         return bin_
 
-    def binarize(self, y):
+    def binarize(self, to_bin):
         """
         Args:
-            y: A list of of labels to be binarized.
-               Items in `y` that are iterable (except strings) will be binarized as a multi-label item,
+            to_bin: A list of of labels to be binarized.
+               Items in `to_bin` that are iterable (except strings) will be binarized as a multi-label item,
                all other items will be binarized as a single-label item.
         Returns:
             A list of binarized label lists.
         """
         binarized = []
-        for item in y:
+        for item in to_bin:
             bin_ = self.bin_label(item)
             binarized.append(bin_)
         return binarized
 
     def unbin_label(self, item):
         unbin = []
-        for it in item:
-            if it:
-                unbin.append(self._reverse_index[it])
+        for idx in item:
+            if idx:
+                unbin.append(self._reverse_index[idx])
         return unbin
 
-    def unbinarize(self, y):
+    def unbinarize(self, from_bin):
         unbinarized = []
-        for item in y:
+        for item in from_bin:
             unbinarized.append(self.unbin_label(item))
         return unbinarized
 
@@ -176,8 +176,7 @@ def main():
                      'ID2,ANSWER2\n'
                      '...\n\n'
                      'Note that it is required that all IDs are present '
-                     'in both files in the same order.'
-                     ),
+                     'in both files in the same order.'),
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('solution', help='The gold standard solutions')
     parser.add_argument('predictions', help='Predictions from the challenger')
@@ -195,7 +194,7 @@ def main():
 
     prediction_ids, prediction_classes = parse_solution_file(args.predictions)
     # Make sure that we are working on the same dataset
-    if not solution_ids == prediction_ids:
+    if solution_ids != prediction_ids:
         print('The IDs in the two files are unordered or non-equal.')
         print('IDs only in solution:', set(solution_ids) - set(prediction_ids))
         print('IDs only in prediction:', set(
