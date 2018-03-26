@@ -9,9 +9,9 @@ import numpy as np
 
 
 def precision_recall(prediction, actual, include_f1=False, mode='total'):
-    """
-    Calculates the precision and recall for a prediction on a dataset.
-    Optionally calculates the f1 score as well.
+    """Calculate the precision and recall for a prediction on a dataset.
+
+    Optionally calculate the f1 score as well.
 
     Args:
         prediction: A binary matrix representing the predictions on the
@@ -59,8 +59,8 @@ def precision_recall(prediction, actual, include_f1=False, mode='total'):
 
 
 def jaccard_index(y_true, y_predict):
-    """
-    Calculates the Jaccard index of the predictions on the true values.
+    """Calculate the Jaccard index of the predictions on the true values.
+
     Also known as Jaccard similarity, Hamming score, or multi-label accuracy.
 
     Defined as:
@@ -98,8 +98,7 @@ class Binarizer(object):
     """A binarizer where 1 means class is present, 0 means it is not."""
 
     def __init__(self, classes):
-        """
-        Args:
+        """Args:
             classes: A list of the classes that can be binarized.
         """
         self.classes = sorted(set(classes))
