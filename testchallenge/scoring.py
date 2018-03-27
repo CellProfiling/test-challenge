@@ -183,7 +183,7 @@ POSSIBLE_CLASSES = [
     'HEK 293', 'CACO-2', 'RT4']
 
 
-def main():
+def score():
     """Run script."""
     parser = argparse.ArgumentParser(
         description=('Scores precision, recall, and f1 score for a '
@@ -243,4 +243,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    score()
