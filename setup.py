@@ -2,7 +2,7 @@
 from setuptools import find_packages, setup
 
 GITHUB_URL = 'https://github.com/CellProfiling/test-challenge'
-DOWNLOAD_URL = '{}/get/master.zip'.format(GITHUB_URL)
+DOWNLOAD_URL = '{}/archive/master.zip'.format(GITHUB_URL)
 CLASSIFIERS = [
     # How mature is this project? Common values are
     #   3 - Alpha
