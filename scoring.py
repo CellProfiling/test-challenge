@@ -178,7 +178,9 @@ def parse_solution_file(solution_file):
 
 
 # POSSIBLE_CLASSES should in the future be modified to be program param.
-POSSIBLE_CLASSES = ['U2OS', 'A431', 'HELA']
+POSSIBLE_CLASSES = [
+    'U-251 MG', 'HeLa', 'PC-3', 'HEL', 'REH', 'A549', 'MCF-7', 'U-2 OS',
+    'HEK 293', 'CACO-2', 'RT4']
 
 
 def main():
