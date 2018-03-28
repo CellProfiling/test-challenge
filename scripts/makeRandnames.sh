@@ -1,11 +1,18 @@
 #!/bin/bash
 
+if [ $# -ne 2 ];
+then echo -e "Not correct number of arguments specified. Usage:\nmakeRandnames.sh /tmp/infolder /tmp/outfolder";
+  exit 1;
+fi
+
 INFOLDER=$1
 OUTFOLDER=$2
 #INFOLDER='../inputfiles/'
 #OUTFOLDER='../outputfiles/'
 
 mkdir -p "$OUTFOLDER"
+
+cd "$(dirname "$0")"
 
 #This file should take converted images and give them new randome names with the date to ensure we don't randomly fail to be random.
 #It should also store a map file to get the orignal file names back.
