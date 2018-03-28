@@ -2,8 +2,8 @@
 import os
 
 import click
-import numpy as np
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
 PLATE_ID_CUT = 300
 CONTAMINATED_CELLS = [
@@ -24,19 +24,6 @@ def get_public(data, public=True):
             return data[~data['versions'].isnull()]
         return data[data['versions'].isnull()]
     raise ValueError('Data is missing column versions')
-
-
-def get_cut_mask(data, cut):
-    """Return a boolean mask of data size to cut the data in two pieces."""
-    return np.random.rand(len(data)) < cut
-
-
-def get_cut_data(data, cut):
-    """Return a two item tuple with data cut according to cut."""
-    mask = get_cut_mask(data, cut)
-    first = data[mask]
-    second = data[~mask]
-    return first, second
 
 
 def add_column(data, col_name, column):
@@ -109,6 +96,7 @@ def generate_all(
     if maximum is None:
         maximum = {}
     data = load_data(path)
+    data = data.rename(columns={'atlas_name': 'cell_line'})
     if public is not None:
         # Filter public/non public.
         data = get_public(data, public=public)
@@ -116,10 +104,8 @@ def generate_all(
     validation = []
 
     for cell_line in CONTAMINATED_CELLS:
-        print(cell_line)
-        include['atlas_name'] = [cell_line]
+        include['cell_line'] = [cell_line]
         single_set = generate_set(data, exclude, include, maximum, minimum)
-        single_set = single_set.rename(columns={'atlas_name': 'cell_line'})
         # Add a column with well path based on column filename.
         well_path = single_set['filename'].str.replace(r'_\d+_', '')
         single_set = add_column(single_set, 'well_path', well_path)
@@ -131,9 +117,12 @@ def generate_all(
         # Sets should have these columns: filename, cell_line.
         single_set = include_columns(single_set, ['filename', 'cell_line'])
         # Split each set 80/20 into training/validation
-        cut_data, rest_data = get_cut_data(single_set, cut)
-        training.append(cut_data)
-        validation.append(rest_data)
+        training_cut, validation_cut = train_test_split(
+            single_set, test_size=1 - cut)
+        print('Cell line: {:>8}, training: {}, validation: {}'.format(
+            cell_line, len(training_cut), len(validation_cut)))
+        training.append(training_cut)
+        validation.append(validation_cut)
 
     # Combine all training sets and all validation sets into two sets.
     training = pd.concat(training)
