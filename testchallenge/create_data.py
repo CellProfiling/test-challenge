@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 
 PLATE_ID_CUT = 300
 CONTAMINATED_CELLS = [
-    'U-251 MG', 'HeLa', 'PC-3', 'HEL', 'REH', 'A549', 'MCF7',
+    'U-251 MG', 'HeLa', 'PC-3', 'A549', 'MCF7',
     'U-2 OS', 'HEK 293', 'CACO-2', 'RT4']
 
 
@@ -156,7 +156,7 @@ def create(csv_file, output=None):
     # For each cell line, make a set of sample size 200.
     all_sets = generate_all(
         csv_file, 0.8, exclude, include, maximum, minimum, 100, output=output,
-        public=None)
+        public=True)
 
     return all_sets
 
