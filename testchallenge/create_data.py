@@ -7,7 +7,7 @@ import pandas as pd
 
 PLATE_ID_CUT = 300
 CONTAMINATED_CELLS = [
-    'U-251 MG', 'HeLa', 'PC-3', 'HEL', 'REH', 'A549', 'MCF-7',
+    'U-251 MG', 'HeLa', 'PC-3', 'HEL', 'REH', 'A549', 'MCF7',
     'U-2 OS', 'HEK 293', 'CACO-2', 'RT4']
 
 
@@ -153,7 +153,7 @@ def cli():
 @cli.command()
 @click.argument('csv_file')
 @click.option('-o', '--output', help='Output to a directory')
-def create(csv_file, output):
+def create(csv_file, output=None):
     """Run script."""
     exclude = None  # add filelist here if needed
     include = None
