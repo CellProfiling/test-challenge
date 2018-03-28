@@ -162,7 +162,7 @@ def create(csv_file, output=None):
 
     # For each cell line, make a set of sample size 200.
     all_sets = generate_all(
-        csv_file, 0.8, exclude, include, maximum, minimum, 200, output=output,
+        csv_file, 0.8, exclude, include, maximum, minimum, 100, output=output,
         public=None)
 
     return all_sets
