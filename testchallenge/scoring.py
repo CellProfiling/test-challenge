@@ -167,6 +167,7 @@ def parse_solution_file(solution_file):
     classes = []
     with open(solution_file) as file_handle:
         solution_reader = csv.reader(file_handle)
+        next(solution_reader, None)
         for row in solution_reader:
             row_classes = row[1:]
             if any(class_ not in POSSIBLE_CLASSES for class_ in row_classes):
@@ -179,7 +180,7 @@ def parse_solution_file(solution_file):
 
 # POSSIBLE_CLASSES should in the future be modified to be program param.
 POSSIBLE_CLASSES = [
-    'U-251 MG', 'HeLa', 'PC-3', 'HEL', 'REH', 'A549', 'MCF-7', 'U-2 OS',
+    'U-251 MG', 'HeLa', 'PC-3', 'A549', 'MCF7', 'U-2 OS',
     'HEK 293', 'CACO-2', 'RT4']
 
 
@@ -190,6 +191,7 @@ def score():
                      'simple classification challenge.\r\n'
                      'Both solution files and prediction files should '
                      'follow the general format of:\n\n'
+                     'filename,cell_line'
                      'ID1,ANSWER1\n'
                      'ID2,ANSWER2\n'
                      '...\n\n'
