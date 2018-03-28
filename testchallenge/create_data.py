@@ -153,7 +153,7 @@ def cli():
 @cli.command()
 @click.argument('csv_file')
 @click.option('-o', '--output', help='Output to a directory')
-def main(csv_file, output):
+def create(csv_file, output):
     """Run script."""
     exclude = None  # add filelist here if needed
     include = None
