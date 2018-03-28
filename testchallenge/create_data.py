@@ -51,7 +51,7 @@ def include_columns(data, columns):
     return data[columns]
 
 
-def generate_set(data, exclude, include, maximum, minimum, size=None):
+def generate_set(data, exclude, include, maximum, minimum):
     """Generate a data set based on criteria.
 
     Args:
@@ -60,7 +60,6 @@ def generate_set(data, exclude, include, maximum, minimum, size=None):
         include : Dict of columns and lists of values to include.
         maximum : Dict of columns and values that should be max limit.
         minimum : Dict of columns and values that should be min limit.
-        size : Sample size.
 
     Returns:
         Pandas DataFrame filtered on criteria.
@@ -79,9 +78,6 @@ def generate_set(data, exclude, include, maximum, minimum, size=None):
     for col, val in maximum.items():
         filt = data[col].astype('float') <= val
         data = data[filt]
-    # Filter randomly on sample size.
-    if size and not data.empty:
-        data = data.sample(size)
     return data
 
 
@@ -118,9 +114,16 @@ def generate_all(
     for cell_line in CONTAMINATED_CELLS:
         print(cell_line)
         include['atlas_name'] = [cell_line]
-        single_set = generate_set(
-            data, exclude, include, maximum, minimum, size)
+        single_set = generate_set(data, exclude, include, maximum, minimum)
         single_set = single_set.rename(columns={'atlas_name': 'cell_line'})
+        # Add a column with well path based on column filename.
+        well_path = single_set['filename'].str.replace(r'_\d+_', '')
+        single_set = add_column(single_set, 'well_path', well_path)
+        # Drop duplicates on well path.
+        single_set = single_set.drop_duplicates('well_path')
+        # Filter randomly on sample size.
+        if size and not single_set.empty:
+            single_set = single_set.sample(size)
         # Split each set 80/20 into training/validation
         cut_data, rest_data = get_cut_data(single_set, cut)
         training.append(cut_data)
@@ -167,11 +170,6 @@ def create(csv_file, output=None):
 
     return all_sets
 
-
-# TODO: Validate that all paths from one well are in one of the dataset cuts:
-# training, validation or test
-# TODO: Make sure to cut into sample cuts
-# after sample filtering on filename and sample size.
 
 if __name__ == '__main__':
     cli()
