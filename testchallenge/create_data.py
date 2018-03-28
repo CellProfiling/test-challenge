@@ -88,12 +88,17 @@ def generate_all(
 
     Args:
         path : Path to csv file.
+        cut : Float 0..1 representing how to cut training and validation.
         exclude : Dict of columns and lists of values to exclude.
         include : Dict of columns and lists of values to include.
         maximum : Dict of columns and values that should be max limit.
         minimum : Dict of columns and values that should be min limit.
         size : Sample size.
+        output : Path to directory where to save csv files with data.
         public : Boolean where true means only public data should be included.
+
+    Returns:
+        Dict with two Pandas DataFrame for training and validation.
     """
     if include is None:
         include = {}
