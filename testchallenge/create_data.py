@@ -107,7 +107,6 @@ def generate_all(
     if public is not None:
         # Filter public/non public.
         data = get_public(data, public=public)
-    all_sets = {}
     training = []
     validation = []
 
@@ -124,27 +123,24 @@ def generate_all(
         # Filter randomly on sample size.
         if size and not single_set.empty:
             single_set = single_set.sample(size)
+        # Sets should have these columns: filename, cell_line.
+        single_set = include_columns(single_set, ['filename', 'cell_line'])
         # Split each set 80/20 into training/validation
         cut_data, rest_data = get_cut_data(single_set, cut)
         training.append(cut_data)
         validation.append(rest_data)
 
     # Combine all training sets and all validation sets into two sets.
-    training_set = pd.concat(training)
-    validation_set = pd.concat(validation)
-
-    # Sets should have these columns: filename, cell_line.
-    for name, part in (
-            ('training', training_set), ('validation', validation_set)):
-        all_sets[name] = include_columns(part, ['filename', 'cell_line'])
+    training = pd.concat(training)
+    validation = pd.concat(validation)
 
     if output is not None:
         # Save both sets as two csv files.
-        for name, data in all_sets.items():
+        for name, data in ('training', training), ('validation', validation):
             data.to_csv('{}.csv'.format(
                 os.path.join(os.path.normpath(output), name)), index=False)
 
-    return all_sets
+    return {'training': training, 'validation': validation}
 
 
 @click.group()
