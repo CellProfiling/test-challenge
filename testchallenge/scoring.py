@@ -3,10 +3,10 @@
 import argparse
 import collections
 import csv
-import simplejson
 import sys
 
 import numpy as np
+import simplejson
 
 
 def precision_recall(prediction, actual, include_f1=False, mode='total'):
