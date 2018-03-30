@@ -6,6 +6,7 @@ import csv
 import sys
 
 import numpy as np
+import simplejson
 
 
 def precision_recall(prediction, actual, include_f1=False, mode='total'):
@@ -167,8 +168,17 @@ def parse_solution_file(solution_file):
     classes = []
     with open(solution_file) as file_handle:
         solution_reader = csv.reader(file_handle)
-        next(solution_reader, None)
+        header = next(solution_reader, None)
+        if header != HEADER:
+            raise ValueError(
+                'Incorrect header found: {}, should be: {}'.format(
+                    header, HEADER))
         for row in solution_reader:
+            if len(row) < 2:
+                raise ValueError(
+                    'Bad row length: {}, '
+                    'should be at least {} for row {}'.format(
+                        len(row), len(HEADER), row))
             row_classes = row[1:]
             if any(class_ not in POSSIBLE_CLASSES for class_ in row_classes):
                 raise ValueError(
@@ -182,6 +192,8 @@ def parse_solution_file(solution_file):
 POSSIBLE_CLASSES = [
     'U-251 MG', 'HeLa', 'PC-3', 'A549', 'MCF7', 'U-2 OS',
     'HEK 293', 'CACO-2', 'RT4']
+
+HEADER = ['filename', 'cell_line']
 
 
 def score():
@@ -228,14 +240,14 @@ def score():
 
     output_file = args.output_file
     if output_file:
-        csvfile = open(args.output_file, 'w')
-        writer = csv.writer(csvfile)
-        writer.writerow(['class', 'pre', 'rec', 'f1'])
-        for i, class_ in enumerate(binarizer.classes):
-            writer.writerow([class_, result[0][i], result[1][i], result[2][i]])
-        writer.writerow(['overall', overall_result[0],
-                         overall_result[1], overall_result[2]])
-        csvfile.close()
+        json_result = {
+            'data': list(overall_result),
+            'additionalData': [
+                [result[0][idx], result[1][idx], result[2][idx]]
+                for idx, _ in enumerate(binarizer.classes)]}
+        with open(args.output_file, 'w') as json_file:
+            simplejson.dump(json_result, json_file, ignore_nan=True, indent=2)
+        print(simplejson.dumps(json_result, ignore_nan=True, indent=2))
     else:
         print('class', 'pre', 'rec', 'f1')
         for i, class_ in enumerate(binarizer.classes):
