@@ -167,8 +167,17 @@ def parse_solution_file(solution_file):
     classes = []
     with open(solution_file) as file_handle:
         solution_reader = csv.reader(file_handle)
-        next(solution_reader, None)
+        header = next(solution_reader, None)
+        if header != HEADER:
+            raise ValueError(
+                'Incorrect header found: {}, should be: {}'.format(
+                    header, HEADER))
         for row in solution_reader:
+            if len(row) < 2:
+                raise ValueError(
+                    'Bad row length: {}, '
+                    'should be at least {} for row {}'.format(
+                        len(row), len(HEADER), row))
             row_classes = row[1:]
             if any(class_ not in POSSIBLE_CLASSES for class_ in row_classes):
                 raise ValueError(
@@ -182,6 +191,8 @@ def parse_solution_file(solution_file):
 POSSIBLE_CLASSES = [
     'U-251 MG', 'HeLa', 'PC-3', 'A549', 'MCF7', 'U-2 OS',
     'HEK 293', 'CACO-2', 'RT4']
+
+HEADER = ['filename', 'cell_line']
 
 
 def score():
