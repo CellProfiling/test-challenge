@@ -23,6 +23,10 @@ testchallenge --help
 ```
 testchallenge example_solution.csv example_prediction.csv
 ```
+- Run program and score a submission and save results to json.
+```
+testchallenge example_solution.csv example_prediction.csv -O results.json
+```
 
 ## Docker
 
@@ -39,4 +43,11 @@ docker run --rm proteinatlas/test-challenge:latest
 docker run --rm \
   -v ~/solutions:/app/solutions \
   proteinatlas/test-challenge:latest solutions/solution.csv solutions/prediction.csv
+```
+- Run the docker container with your own solutions and save to json.
+```
+docker run --rm \
+  -v ~/solutions:/app/solutions \
+  proteinatlas/test-challenge:latest solutions/solution.csv solutions/prediction.csv \
+  -O solutions/results.json
 ```
