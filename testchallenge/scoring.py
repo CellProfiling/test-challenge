@@ -247,8 +247,7 @@ def score():
                 for idx, _ in enumerate(binarizer.classes)]}
         with open(args.output_file, 'w') as json_file:
             simplejson.dump(json_result, json_file, ignore_nan=True, indent=2)
-        print(simplejson.dumps(
-            json_result, json_file, ignore_nan=True, indent=2))
+        print(simplejson.dumps(json_result, ignore_nan=True, indent=2))
     else:
         print('class', 'pre', 'rec', 'f1')
         for i, class_ in enumerate(binarizer.classes):
