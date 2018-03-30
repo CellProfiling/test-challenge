@@ -3,6 +3,7 @@
 import argparse
 import collections
 import csv
+import simplejson
 import sys
 
 import numpy as np
@@ -239,14 +240,13 @@ def score():
 
     output_file = args.output_file
     if output_file:
-        csvfile = open(args.output_file, 'w')
-        writer = csv.writer(csvfile)
-        writer.writerow(['class', 'pre', 'rec', 'f1'])
-        for i, class_ in enumerate(binarizer.classes):
-            writer.writerow([class_, result[0][i], result[1][i], result[2][i]])
-        writer.writerow(['overall', overall_result[0],
-                         overall_result[1], overall_result[2]])
-        csvfile.close()
+        json_result = {
+            'data': list(overall_result),
+            'additionalData': [
+                [result[0][idx], result[1][idx], result[2][idx]]
+                for idx, _ in enumerate(binarizer.classes)]}
+        with open(args.output_file, 'w') as json_file:
+            simplejson.dump(json_result, json_file, ignore_nan=True, indent=2)
     else:
         print('class', 'pre', 'rec', 'f1')
         for i, class_ in enumerate(binarizer.classes):
