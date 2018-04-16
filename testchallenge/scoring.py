@@ -173,7 +173,8 @@ def parse_solution_file(solution_file):
             raise ValueError(
                 'Incorrect header found: {}, should be: {}'.format(
                     header, HEADER))
-        for row in solution_reader:
+        solution = sorted(list(solution_reader), key=lambda x: x[0])
+        for row in solution:
             if len(row) < 2:
                 raise ValueError(
                     'Bad row length: {}, '
@@ -198,17 +199,18 @@ HEADER = ['filename', 'cell_line']
 
 def score():
     """Run script."""
+    # pylint: disable=too-many-locals
     parser = argparse.ArgumentParser(
         description=('Scores precision, recall, and f1 score for a '
                      'simple classification challenge.\r\n'
                      'Both solution files and prediction files should '
                      'follow the general format of:\n\n'
-                     'filename,cell_line'
+                     'filename,cell_line\n'
                      'ID1,ANSWER1\n'
                      'ID2,ANSWER2\n'
                      '...\n\n'
                      'Note that it is required that all IDs are present '
-                     'in both files in the same order.'),
+                     'in both files.'),
         formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('solution', help='The gold standard solutions')
     parser.add_argument('predictions', help='Predictions from the challenger')
