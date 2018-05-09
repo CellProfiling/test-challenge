@@ -50,6 +50,7 @@ def generate_set(data, exclude, include, maximum, minimum):
 
     Returns:
         Pandas DataFrame filtered on criteria.
+
     """
     # Exclude items.
     for col, vals in exclude.items():
@@ -86,6 +87,7 @@ def generate_all(
 
     Returns:
         Dict with two Pandas DataFrame for training and validation.
+
     """
     if include is None:
         include = {}
